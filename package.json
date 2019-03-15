@@ -1,0 +1,20 @@
+{
+  "name": "triala",
+  "version": "0.3.0",
+  "description": "A minimal test runner for programmers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node npm test.js -v"
+  },
+  "keywords": [
+    "unit",
+    "testing",
+    "minimal",
+    "test",
+    "runner",
+    "asynchronous",
+    "async"
+  ],
+  "author": "Michal Kochel",
+  "license": "MIT"
+}
