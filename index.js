@@ -3,35 +3,39 @@
 const RED = '\x1b[31m%s\x1b[0m'
 const GREEN = '\x1b[32m%s\x1b[0m'
 
-async function run (name, Test) {
+async function test (name, Suite) {
   const verbose = process.argv.length === 3 && process.argv[2] === '-v'
 
-  const test = new Test()
+  const suite = new Suite()
   const count = { total: 0, failures: 0 }
+  const names = Object.getOwnPropertyNames(Object.getPrototypeOf(suite))
+  const hasSolos = names.some(n => n.toLowerCase().startsWith('s '))
 
-  test._before && await test._before()
+  suite._before && await suite._before()
 
-  for (let name of Object.getOwnPropertyNames(Object.getPrototypeOf(test))) {
-    if (name !== 'constructor' && !name.startsWith('_')) {
+  for (const name of names) {
+    const isSpecial = name === 'constructor' || name.startsWith('_')
+    const isMuted = name.toLowerCase().startsWith('m ') || (hasSolos && !name.toLowerCase().startsWith('s '))
+
+    if (!isSpecial && !isMuted) {
       count.total += 1
-
-      test._beforeEach && await test._beforeEach()
+      suite._beforeEach && await suite._beforeEach()
       try {
-        await test[name]()
+        await suite[name]()
         verbose && console.log(GREEN, `> ${name}`)
       } catch (err) {
         console.log(RED, `> ${name}: ${err.message}`)
         console.error('  ' + err.stack)
         count.failures += 1
       }
-      test._afterEach && await test._afterEach()
+      suite._afterEach && await suite._afterEach()
     }
   }
 
-  test._after && await test._after()
+  suite._after && await suite._after()
 
   console.log(count.failures ? RED : GREEN, `\n${name}: passed ${count.total - count.failures} of ${count.total}`)
-  process.exit(count.failures === 0 ? 0 : 1)
+  process.exitCode = count.failures === 0 ? 0 : 1
 }
 
-module.exports = run
+export default test

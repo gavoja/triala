@@ -1,10 +1,11 @@
 # Triala
 
 A minimal test runner for programmers.
-* No globals
+* No globals.
 * No dependencies.
 * Asynchronous tests with ES6 await/async syntax.
-* And all less than 50 lines of code!
+* Test cases are run sequentially in order.
+* And all that in less than 50 lines of code!
 
 ## Writing tests
 
@@ -13,12 +14,12 @@ A minimal test runner for programmers.
 // my-fancy-suite.js
 
 // Because globals are BAD.
-const test = require('triala')
+import test from 'triala'
 
 // Because there is no point in reinventing the wheel.
-const assert = require('assert')
+import assert from 'assert'
 
-// Let's define our suite.
+// Define your suite.
 test('My fancy suite', class {
   // Define some standard hooks.
   async _before { console.log('I will be run before the suite.') }
@@ -27,12 +28,8 @@ test('My fancy suite', class {
   async _afterEach () { console.log('I will be run after each test.') }
 
   // Prefix helper methods with '_'.
-  async _delayByOneSecond (callback) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        callback(resolve, reject)
-      }, 1000)
-    })
+  async _timeout (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   //
@@ -43,23 +40,31 @@ test('My fancy suite', class {
     assert.ok('Passing through')
   }
 
-  async 'It should pass after some time' () {
-    await this._delayByOneSecond((resolve, reject) => {
-      resolve()
-    })
+  'It should throw error' () {
+    throw new Error('You shall not pass!')
   }
 
-  async 'it should fail after some time' () {
-    await this._delayByOneSecond((resolve, reject) => {
-      reject(new Error('You shall not pass!'))
-    })
+  async 'It should pass after some time' () {
+    await this._timeout(1000)
+    assert.ok('Passing through')
+  }
+
+  async 'It should fail after some time' () {
+    await this._timeout(1000)
+    assert.fail('You shall not pass!')
+  }
+
+  // Prefix with 'm ' (mute) to disable a test.
+  // Prefix with 's ' (solo) to diable all other tests.
+  // Prefixes are case insensitive. Multiple solos are supported.
+  'm It will not be run' () {
+    assert.fail('Does not matter.')
   }
 })
 
-
 ```
 
-## Running test
+## Running tests
 
 Just run the file:
 ```

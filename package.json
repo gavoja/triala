@@ -1,10 +1,14 @@
 {
   "name": "triala",
-  "version": "0.3.0",
+  "type": "module",
+  "version": "0.4.0",
   "description": "A minimal test runner for programmers.",
   "main": "index.js",
   "scripts": {
     "test": "node npm test.js -v"
+  },
+  "engines": {
+    "node": ">=14.15.1"
   },
   "keywords": [
     "unit",
